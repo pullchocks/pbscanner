@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Port Scanner for PalBot</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container mt-5">
+    <h1>Port Scanner for PalBot</h1>
+    <p class="alert alert-warning">This tool is for scanning an open RCON port to ensure usability with PalBot. Please use responsibly.</p>
+    
+    <form method="post" class="form-inline" id="scanForm">
+        {% csrf_token %}
+        <div class="form-group mb-2">
+            {{ form.target.label_tag }}
+            {{ form.target }}
+            {{ form.target.errors }}
+        </div>
+        <div class="form-group mx-sm-3 mb-2">
+            {{ form.port.label_tag }}
+            {{ form.port }}
+            {{ form.port.errors }}
+        </div>
+        <button type="submit" class="btn btn-primary mb-2">Scan</button>
+        <button type="button" class="btn btn-secondary mb-2" id="resetButton">Reset</button>
+    </form>
+    
+    <div id="messageArea">
+        {% if message %}
+            <div class="alert alert-success mt-3">{{ message }}</div>
+        {% endif %}
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+    document.getElementById('resetButton').addEventListener('click', function() {
+        document.getElementById('scanForm').reset(); // Reset form fields
+        document.getElementById('messageArea').innerHTML = ''; // Clear messages
+    });
+</script>
+
+</body>
+</html>
