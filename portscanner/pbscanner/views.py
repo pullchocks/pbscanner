@@ -2,30 +2,28 @@ from django.shortcuts import render
 from .forms import ScanForm
 import socket
 
-def is_open_tcp(ip, port):
-    print(f"Checking TCP port: {ip}:{port}")
-    try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.settimeout(3)
-            result = sock.connect_ex((ip, port))
-            print(f"connect_ex result: {result}")
-            return result == 0
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        return False
+def can_connect_to_external_port(host, port):
+    """Attempt to connect to an external host and port to see if it's accessible."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.settimeout(5)  # Adjust timeout as needed
+        try:
+            result = sock.connect_ex((host, port))
+            if result == 0:
+                return True  # Successfully connected
+            else:
+                return False  # Failed to connect
+        except socket.error:
+            return False  # Socket error occurred
 
 def scan(request):
     message = ''
-    if request.method == 'POST':
-        form = ScanForm(request.POST)
-        if form.is_valid():
-            target = form.cleaned_data['target']
-            port = form.cleaned_data['port']
-            if is_open_tcp(target, port):
-                message = 'Good to go! RCON port is accessable.'
-            else:
-                message = 'RCON port is closed or not accessible.'
-    else:
-        form = ScanForm()
+    form = ScanForm(request.POST or None)
+    if request.method == 'POST' and form.is_valid():
+        target = form.cleaned_data['target']
+        port = form.cleaned_data['port']
+        if can_connect_to_external_port(target, port):
+            message = 'Connection successful. The port is open and accessible.'
+        else:
+            message = 'Failed to connect. The port is closed or not accessible.'
 
     return render(request, 'pbscanner/scan.html', {'form': form, 'message': message})
